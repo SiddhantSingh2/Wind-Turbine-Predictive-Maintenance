@@ -40,11 +40,17 @@ graph LR
 
 ## 📊 Visualization & Dashboards
 
-The project is designed to feed downstream BI tools (Tableau/PowerBI) or custom Python dashboards.
+The project includes automated scripts to generate performance insights from the processed telemetry data.
 
 ### 📈 Dashboard Insights
--   **Turbine Power Curve:** Visualizes `wind_speed` vs. `power_output` to detect performance degradation (e.g., blade fouling or icing).
--   **Bearing Health Monitor:** Real-time tracking of `bearing_temp`. Sustained high temperatures trigger a "Critical Overheating" alert in the **Gold** layer.
+-   **Turbine Power Curve:** Visualizes `wind_speed` vs. `power_output`. This is a critical diagnostic for performance health.
+    
+    ![Power Curve](data/insights/power_curve.png)
+
+-   **Power Output Stability:** Tracks production over time to monitor operational consistency.
+    
+    ![Power Over Time](data/insights/power_over_time.png)
+
 -   **Vibration Anomaly Detection:** Identifies abnormal mechanical wear before component failure.
 
 > **Tip:** You can use the `notebooks/` directory to run exploratory visualizations using Seaborn or Plotly.
