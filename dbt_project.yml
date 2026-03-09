@@ -1,0 +1,22 @@
+name: 'wind_turbine_maintenance'
+version: '1.0.0'
+config-version: 2
+
+profile: 'wind_turbine'
+
+model-paths: ["dbt/models"]
+analysis-paths: ["dbt/analysis"]
+test-paths: ["dbt/tests"]
+seed-paths: ["dbt/seeds"]
+macro-paths: ["dbt/macros"]
+snapshot-paths: ["dbt/snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  wind_turbine_maintenance:
+    gold:
+      +materialized: table

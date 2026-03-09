@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: gold_turbine_health
+    description: "Final analytical layer for reporting and alerting on wind turbine health metrics."
+    columns:
+      - name: turbine_id
+        description: "Unique identifier for the wind turbine."
+        tests:
+          - not_null
+      - name: maintenance_required
+        description: "Boolean flag indicating if vibration exceeds 2 standard deviations from historical mean."
+
+  - name: turbine_alerts
+    description: "Real-time alerts for critical overheating conditions."
+    columns:
+      - name: alert_status
+        description: "Status of the alert (e.g., Critical Overheating)."
+        tests:
+          - accepted_values:
+              values: ['Critical Overheating']
