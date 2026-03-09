@@ -2,37 +2,79 @@
 
 This project implements a scalable data pipeline for monitoring wind turbine health using IoT SCADA data, leveraging a **Medallion Architecture** to ensure data quality and reliability.
 
-## Architecture Overview (Medallion Architecture)
+## 🏗️ Architecture Overview
 
-The pipeline processes high-frequency IoT sensor data across three layers:
+The pipeline follows the **Medallion Architecture** to transform raw sensor telemetry into actionable business insights.
 
+```mermaid
+graph LR
+    subgraph "Ingestion (Bronze)"
+        A[Raw SCADA CSV] --> B[Raw Parquet]
+    end
+    subgraph "Processing (Silver)"
+        B --> C[PySpark Processing]
+        C --> D[Silver Telemetry Table]
+    end
+    subgraph "Modeling (Gold)"
+        D --> E[dbt Health Metrics]
+        D --> F[dbt Critical Alerts]
+    end
+    subgraph "Insights (Consumption)"
+        E --> G[Health Dashboard]
+        F --> H[Real-time Notifications]
+    end
+```
+
+### Data Layers
 1.  **Bronze (Raw):**
-    *   Ingests raw SCADA IoT JSON files from edge devices.
-    *   Preserves full history with minimal transformations.
-    *   Stored in its original raw format for auditing.
+    *   Ingests raw SCADA IoT files (now using the **Inland Wind Farm WT1** dataset).
+    *   Preserves full history for auditing.
 
 2.  **Silver (Cleaned & Augmented):**
-    *   Performs data cleaning: missing sensor values (`wind_speed`, `power_output`) are handled using interpolation (Last Observation Carried Forward).
-    *   Feature Engineering: Computes 10-minute rolling averages for `gearbox_temperature` and `vibration_index` to reduce noise and identify trends.
-    *   Saved as **Delta Tables** to provide ACID transactions and schema enforcement.
+    *   **PySpark ETL:** Handles missing values and synthesizes bearing temperatures based on power output.
+    *   **Normalization:** Maps heterogeneous source schemas into a unified telemetry standard.
 
 3.  **Gold (Aggregated & Business-Ready):**
-    *   Final analytical layer for reporting and alerting.
-    *   Calculates health metrics using dbt.
-    *   Flags `maintenance_required` status when vibration exceeds 2 standard deviations from the historical mean, enabling predictive maintenance.
+    *   **Predictive Maintenance:** Flags turbines where vibration exceeds 2 standard deviations (`gold_turbine_health`).
+    *   **Critical Alerts:** Detects sustained overheating (>85°C for 30+ minutes) using window functions (`turbine_alerts`).
 
-## IoT Data Lifecycle
+## 📊 Visualization & Dashboards
 
-1.  **Ingestion:** SCADA sensors stream data into a cloud storage (landing zone).
-2.  **Processing:** PySpark (Batch/Streaming) cleans and aggregates the data.
-3.  **Modeling:** dbt applies business logic and statistical anomaly detection.
-4.  **Orchestration:** Airflow (DAGs) schedules and monitors the end-to-end pipeline.
-5.  **Consumption:** Downstream dashboards (Tableau/PowerBI) or ML models consume the Gold layer for predictive alerts.
+The project is designed to feed downstream BI tools (Tableau/PowerBI) or custom Python dashboards.
 
-## Project Structure
+### 📈 Dashboard Insights
+-   **Turbine Power Curve:** Visualizes `wind_speed` vs. `power_output` to detect performance degradation (e.g., blade fouling or icing).
+-   **Bearing Health Monitor:** Real-time tracking of `bearing_temp`. Sustained high temperatures trigger a "Critical Overheating" alert in the **Gold** layer.
+-   **Vibration Anomaly Detection:** Identifies abnormal mechanical wear before component failure.
 
-- `/data`: Local placeholder for raw and processed datasets.
-- `/scripts`: PySpark transformation scripts for ETL.
-- `/dbt`: SQL models for business logic and statistical profiling.
-- `/airflow_dags`: Workflow orchestration definitions.
-- `/notebooks`: Exploratory Data Analysis (EDA) and prototyping.
+> **Tip:** You can use the `notebooks/` directory to run exploratory visualizations using Seaborn or Plotly.
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+-   Python 3.8+
+-   PySpark
+-   dbt-core
+
+### 2. Installation
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Execution
+```bash
+# Process raw data into Silver layer
+python scripts/edp_processing.py
+
+# Build Gold layer with dbt
+dbt run
+dbt test
+```
+
+## 📂 Project Structure
+
+- `/data`: Storage for raw (Bronze), silver, and gold datasets.
+- `/scripts`: PySpark ETL scripts for data ingestion and mapping.
+- `/dbt`: SQL models for business logic, health scoring, and alerts.
+- `/airflow_dags`: Workflow definitions for pipeline orchestration.
+- `/notebooks`: Exploratory Data Analysis and visualization prototypes.
